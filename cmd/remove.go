@@ -49,6 +49,7 @@ var removeCmd = &cobra.Command{
 		case generator.ReadmeIdentifier:
 			readme := generator.NewReadmeFromConfig(cfg)
 			readme.Remove(cfg)
+			cfg.Project.RemoveGenerator(generator.ReadmeIdentifier)
 			cli.Successf("removed generator '%s'", generator.ReadmeIdentifier)
 			break
 		}

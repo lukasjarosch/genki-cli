@@ -25,22 +25,22 @@ func NewProjectConfiguration(rootPath string) *Configuration {
 }
 
 func (cfg *Configuration) Save() {
-	viper.Set("genki", *cfg)
+	viper.Set("genki.project", cfg.Project)
 	if err := viper.WriteConfig(); err != nil {
 		cli.Errorf("unable to write config file: %s", err)
 	}
 }
 
 func (cfg *Configuration) Set(key string, value interface{}) {
-	viper.Set(key, value)
+	viper.Set(fmt.Sprintf("genki.%s", key), value)
 }
 
 func (cfg *Configuration) GetString(key string) string {
-	return viper.GetString(key)
+	return viper.GetString(fmt.Sprintf("genki.%s", key))
 }
 
 func (cfg *Configuration) Delete(key string) {
-	delete(viper.Get(key).(map[string]interface{}), key)
+	delete(viper.Get("genki").(map[string]interface{}), key)
 }
 
 func (cfg *Configuration) Exists() bool {
