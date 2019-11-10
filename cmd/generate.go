@@ -49,14 +49,18 @@ var generateCmd = &cobra.Command{
 			Config: *cfg,
 		}
 
-		switch generatorName {
-		case generator.ReadmeIdentifier:
-			readme := generator.NewReadmeFromConfig(cfg)
-			if err := readme.Generate(tplContext); err != nil {
-				cli.Errorf("generate failed: %s", err)
-				os.Exit(1)
-			}
+		gen, err := generator.NewGenerator(generatorName)
+		if err != nil {
+			cli.Errorf("failed to load generator '%s': %s", generatorName, err)
+			os.Exit(1)
 		}
+		gen.LoadConfiguration(cfg)
+
+		if err := gen.Generate(tplContext); err != nil {
+			cli.Errorf("%s generator failed: %s", generatorName, err)
+			return
+		}
+		cfg.Save()
 	},
 }
 

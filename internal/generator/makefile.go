@@ -10,21 +10,25 @@ import (
 	"github.com/lukasjarosch/genki-cli/pkg/writer"
 )
 
-type Readme struct {
+type Makefile struct {
 	target       string
 	templateName string
 	templatePath string
 }
 
-func newReadme() *Readme {
-	return &Readme{
-		target:       "./README.md",
-		templateName: "Readme",
-		templatePath: "Readme.go.tmpl",
+func newMakefile() *Makefile {
+	return &Makefile{
+		target:       "./Makefile",
+		templateName: "Makefile",
+		templatePath: "Makefile.go.tmpl",
 	}
 }
 
-func (g *Readme) Generate(ctx internal.Context) error {
+func (g *Makefile) LoadConfiguration(cfg *config.Configuration) {
+	g.target = cfg.GetString("Makefile.path")
+}
+
+func (g *Makefile) Generate(ctx internal.Context) error {
 	// render Makefile
 	tpl := template.NewTemplate(
 		template.Name(g.templateName),
@@ -45,14 +49,11 @@ func (g *Readme) Generate(ctx internal.Context) error {
 	return nil
 }
 
-func (g *Readme) Configure(cfg *config.Configuration) {
-	cfg.Set("Readme.path", g.target)
+func (g *Makefile) Configure(cfg *config.Configuration) {
+	cfg.Set("Makefile.path", g.target)
 }
 
-func (g *Readme) Remove(cfg *config.Configuration) {
-	cfg.Delete("Readme")
+func (g *Makefile) Remove(cfg *config.Configuration) {
+	cfg.Delete("Makefile")
 }
 
-func (g *Readme) LoadConfiguration(cfg *config.Configuration) {
-	g.target = cfg.GetString("Readme.path")
-}

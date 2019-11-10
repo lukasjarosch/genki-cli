@@ -44,15 +44,15 @@ var removeCmd = &cobra.Command{
 			cli.Errorf("generator '%s' not enabled", generatorName)
 			os.Exit(1)
 		}
+		cfg.Project.RemoveGenerator(generatorName)
 
-		switch generatorName {
-		case generator.ReadmeIdentifier:
-			readme := generator.NewReadmeFromConfig(cfg)
-			readme.Remove(cfg)
-			cfg.Project.RemoveGenerator(generator.ReadmeIdentifier)
-			cli.Successf("removed generator '%s'", generator.ReadmeIdentifier)
-			break
+		gen, err := generator.NewGenerator(generatorName)
+		if err != nil {
+			cli.Errorf("failed to load generator '%s': %s", generatorName, err)
+			os.Exit(1)
 		}
+		gen.Remove(cfg)
+		cli.Successf("removed '%s' generator from project", generatorName)
 		cfg.Save()
 	},
 }

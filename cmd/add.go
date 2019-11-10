@@ -42,31 +42,31 @@ var addCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		generatorName := args[0]
-
-		switch generatorName {
-		case generator.ReadmeIdentifier:
-			if err := cfg.Project.AddGenerator(generator.ReadmeIdentifier); err != nil {
-				cli.Warningf("generator '%s' is already enabled", generatorName)
-				return
-			}
-			cli.Infof("generator '%s' enabled", generator.ReadmeIdentifier)
-
-			tplContext := internal.Context{
-				Config: *cfg,
-			}
-
-			readme := generator.NewReadme()
-			readme.Configure(cfg)
-			if err := readme.Generate(tplContext); err != nil {
-				cli.Errorf("%s generator failed: %s", generator.ReadmeIdentifier, err)
-				return
-			}
-			cfg.Save()
-
-			break
-		default:
-			cli.Errorf("unknown generator: %s", generatorName)
+		tplContext := internal.Context{
+			Config: *cfg,
 		}
+
+		// resolve generator by name or fail
+		gen, err := generator.NewGenerator(generatorName)
+		if err != nil {
+		    cli.Errorf("failed to add generator '%s': %s", generatorName, err)
+		    os.Exit(1)
+		}
+
+		// add to project config
+		if err := cfg.Project.AddGenerator(generatorName); err != nil {
+			cli.Warningf("generator '%s' is already enabled", generatorName)
+			return
+		}
+		cli.Infof("generator '%s' enabled", generatorName)
+
+		// configure and run generator
+		gen.Configure(cfg)
+		if err := gen.Generate(tplContext); err != nil {
+			cli.Errorf("%s generator failed: %s", generatorName, err)
+			return
+		}
+		cfg.Save()
 	},
 }
 
