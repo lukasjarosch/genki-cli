@@ -19,7 +19,16 @@ var Templates = func() http.FileSystem {
 	fs := vfsgen۰FS{
 		"/": &vfsgen۰DirInfo{
 			name:    "/",
-			modTime: time.Date(2019, 11, 10, 20, 36, 22, 696969052, time.UTC),
+			modTime: time.Date(2019, 11, 10, 20, 55, 3, 461812468, time.UTC),
+		},
+		"/k8s": &vfsgen۰DirInfo{
+			name:    "k8s",
+			modTime: time.Date(2019, 11, 10, 20, 54, 41, 641819256, time.UTC),
+		},
+		"/k8s/service.go.tmpl": &vfsgen۰FileInfo{
+			name:    "service.go.tmpl",
+			modTime: time.Date(2019, 11, 10, 20, 54, 41, 641819256, time.UTC),
+			content: []byte(""),
 		},
 		"/makefile.go.tmpl": &vfsgen۰FileInfo{
 			name:    "makefile.go.tmpl",
@@ -35,8 +44,12 @@ var Templates = func() http.FileSystem {
 		},
 	}
 	fs["/"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
+		fs["/k8s"].(os.FileInfo),
 		fs["/makefile.go.tmpl"].(os.FileInfo),
 		fs["/readme.go.tmpl"].(os.FileInfo),
+	}
+	fs["/k8s"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
+		fs["/k8s/service.go.tmpl"].(os.FileInfo),
 	}
 
 	return fs

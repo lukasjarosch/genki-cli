@@ -1,58 +1,38 @@
 package generator
 
 import (
-	"fmt"
-
-	"github.com/lukasjarosch/genki-cli/internal"
-	"github.com/lukasjarosch/genki-cli/internal/cli"
 	"github.com/lukasjarosch/genki-cli/internal/config"
-	"github.com/lukasjarosch/genki-cli/pkg/template"
-	"github.com/lukasjarosch/genki-cli/pkg/writer"
 )
 
 type Readme struct {
-	target       string
-	templateName string
-	templatePath string
+	baseGenerator
 }
 
 func newReadme() *Readme {
+	targets := map[string]Target{
+		"readme": {
+			Path:         "./README.md",
+			TemplateName: "readme",
+			TemplatePath: "/readme.go.tmpl",
+			GoSource:     false,
+			Overwrite:    true,
+			AppendWrite:  false,
+		},
+	}
 	return &Readme{
-		target:       "./README.md",
-		templateName: "Readme",
-		templatePath: "Readme.go.tmpl",
+		baseGenerator{Targets:targets},
 	}
-}
-
-func (g *Readme) Generate(ctx internal.Context) error {
-	// render Makefile
-	tpl := template.NewTemplate(
-		template.Name(g.templateName),
-		template.GoSource(false),
-		template.UseFilesystem(internal.Templates),
-		template.Path(g.templatePath),
-	)
-	rendered, err := tpl.Render(ctx)
-	if err != nil {
-		cli.Fatalf("failed to render template: %s", err)
-	}
-	fw := writer.NewFileWriter(g.target, writer.Overwrite(true))
-	if err := fw.WriteFile(rendered); err != nil {
-		return fmt.Errorf("failed to write: %s: %s", g.target, err)
-	}
-	cli.Successf("rendered '%s' into: %s", g.templateName, g.target)
-
-	return nil
 }
 
 func (g *Readme) Configure(cfg *config.Configuration) {
-	cfg.Set("Readme.path", g.target)
+	cfg.Set("readme.path", g.Targets["readme"].Path)
 }
 
 func (g *Readme) Remove(cfg *config.Configuration) {
-	cfg.Delete("Readme")
+	cfg.Delete("readme")
 }
 
 func (g *Readme) LoadConfiguration(cfg *config.Configuration) {
-	g.target = cfg.GetString("Readme.path")
+	newCfg := g.Targets["readme"]
+	newCfg.Path = cfg.GetString("readme.path")
 }

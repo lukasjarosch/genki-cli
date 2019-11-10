@@ -1,59 +1,42 @@
 package generator
 
 import (
-	"fmt"
-
-	"github.com/lukasjarosch/genki-cli/internal"
-	"github.com/lukasjarosch/genki-cli/internal/cli"
 	"github.com/lukasjarosch/genki-cli/internal/config"
-	"github.com/lukasjarosch/genki-cli/pkg/template"
-	"github.com/lukasjarosch/genki-cli/pkg/writer"
 )
 
 type Makefile struct {
-	target       string
-	templateName string
-	templatePath string
+	baseGenerator
 }
 
 func newMakefile() *Makefile {
+	targets := map[string]Target{
+		"makefile": {
+			Path:         "./Makefile",
+			TemplateName: "makefile",
+			TemplatePath: "/makefile.go.tmpl",
+			GoSource:     false,
+			Overwrite:    true,
+			AppendWrite:  false,
+		},
+	}
+
 	return &Makefile{
-		target:       "./Makefile",
-		templateName: "Makefile",
-		templatePath: "Makefile.go.tmpl",
+		baseGenerator{Targets: targets},
 	}
 }
 
 func (g *Makefile) LoadConfiguration(cfg *config.Configuration) {
-	g.target = cfg.GetString("Makefile.path")
-}
+	newCfg := g.Targets["makefile"]
+	newCfg.Path = cfg.GetString("rakefile.path")
 
-func (g *Makefile) Generate(ctx internal.Context) error {
-	// render Makefile
-	tpl := template.NewTemplate(
-		template.Name(g.templateName),
-		template.GoSource(false),
-		template.UseFilesystem(internal.Templates),
-		template.Path(g.templatePath),
-	)
-	rendered, err := tpl.Render(ctx)
-	if err != nil {
-		cli.Fatalf("failed to render template: %s", err)
-	}
-	fw := writer.NewFileWriter(g.target, writer.Overwrite(true))
-	if err := fw.WriteFile(rendered); err != nil {
-		return fmt.Errorf("failed to write: %s: %s", g.target, err)
-	}
-	cli.Successf("rendered '%s' into: %s", g.templateName, g.target)
-
-	return nil
+	g.Targets["makefile"] = newCfg
 }
 
 func (g *Makefile) Configure(cfg *config.Configuration) {
-	cfg.Set("Makefile.path", g.target)
+	cfg.Set("makefile.path", g.Targets["makefile"].Path)
 }
 
 func (g *Makefile) Remove(cfg *config.Configuration) {
-	cfg.Delete("Makefile")
+	cfg.Delete("makefile")
 }
 
