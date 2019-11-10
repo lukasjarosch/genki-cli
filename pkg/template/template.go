@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"io"
 	"io/ioutil"
 	"os"
 	"text/template"
@@ -23,21 +24,41 @@ func NewTemplate(options ...Option) *Template {
 }
 
 func (tpl *Template) Render(templateContext interface{}) ([]byte, error) {
-	if !tpl.SourceFileExists() {
-		return nil, fmt.Errorf("template file missing: %s", tpl.opts.Path)
+	// decide from which filesystem the file should be read and provide the reader
+	var r io.Reader
+	if tpl.opts.Filesystem != nil {
+		f, err := tpl.opts.Filesystem.Open(tpl.opts.Path)
+		if err != nil {
+		    return nil, errors.Wrap(err, "unable to open template from embedded filesystem")
+		}
+		r = f
+		defer f.Close()
+
+	} else {
+		if !tpl.SourceFileExists() {
+			return nil, fmt.Errorf("template file missing: %s", tpl.opts.Path)
+		}
+
+		f, err := os.Open(tpl.opts.Path)
+		if err != nil {
+		    return nil, errors.Wrap(err, "unable to open template from host filesystem")
+		}
+		defer f.Close()
+		r = f
 	}
 
-	buf, err := ioutil.ReadFile(tpl.opts.Path)
+	// read template
+	buf, err := ioutil.ReadAll(r)
 	if err != nil {
 	    return nil, errors.Wrap(err, "unable to read template")
 	}
 
+	// create, parse and execute template, attached are the sprig.TxtFuncMap() and a user-defined funcmap (if any)
 	tmpl := template.New(tpl.opts.Name).Funcs(sprig.TxtFuncMap()).Funcs(tpl.opts.FuncMap)
 	tmpl, err = tmpl.Parse(string(buf))
 	if err != nil {
 	   	return nil, errors.Wrap(err, "unable to parse template")
 	}
-
 	out := bytes.Buffer{}
 	if err := tmpl.Execute(&out, templateContext); err != nil {
 		return nil, errors.Wrap(err, "template execution failed")

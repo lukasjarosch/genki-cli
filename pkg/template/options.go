@@ -1,12 +1,16 @@
 package template
 
-import "text/template"
+import (
+	"net/http"
+	"text/template"
+)
 
 type Options struct {
 	Name     string
 	Path     string
 	GoSource bool
 	FuncMap template.FuncMap
+	Filesystem http.FileSystem
 }
 
 func Name(name string) Option {
@@ -15,6 +19,8 @@ func Name(name string) Option {
 	}
 }
 
+// Path sets the path to the source template file.
+// The path is either relative to the user's CWD or, if an external http.Filesystem is provided, relative to that filesystem.
 func Path(templatePath string) Option {
 	return func(opts *Options) {
 		opts.Path = templatePath
@@ -30,6 +36,12 @@ func GoSource(isGoSource bool) Option {
 func FuncMap(funcMap template.FuncMap) Option {
     return func(opts *Options) {
         opts.FuncMap = funcMap
+    }
+}
+
+func UseFilesystem(fs http.FileSystem) Option {
+    return func(opts *Options) {
+    	opts.Filesystem = fs
     }
 }
 

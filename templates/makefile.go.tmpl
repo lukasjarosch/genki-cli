@@ -1,0 +1,38 @@
+GIT_COMMIT=$(shell git rev-parse --short HEAD)
+DOCKER_IMAGE="{{ .Config.Project.DockerRegistry }}/{{ .Config.Project.Namespace }}-{{ .Config.Project.Service }}"
+DOCKER_TAG="v-${GIT_COMMIT}-dev"
+
+.PHONY: run
+run:
+	@echo "--> starting locally"
+	@go run cmd/{{ .Config.Project.Service }}/main.go --log-level=debug
+
+.PHONY: docker
+docker:
+	@echo "--> building docker image ${DOCKER_IMAGE}:${DOCKER_TAG}"
+	docker build . -t ${DOCKER_IMAGE}:${DOCKER_TAG} -f ./Dockerfile
+
+.PHONY: docker-run
+docker-run:
+	@echo "--> starting container ${DOCKER_IMAGE}:${DOCKER_TAG}"
+	@docker run \
+			--rm \
+			--name {{ .Config.Project.Namespace }}-{{ .Config.Project.Service }} \
+			--network host \
+			${DOCKER_IMAGE}:${DOCKER_TAG}
+
+.PHONY: build
+build:
+	@echo "--> building"
+	@go build -o ./bin/{{ .Config.Project.Service }} ./cmd/{{ .Config.Project.Service }}/main.go
+
+.PHONY: clean
+clean:
+	@echo "--> cleaning up binaries"
+	@go clean -tags netgo -i ./...
+	@rm -r ./bin
+
+.PHONY: update-genki
+update-genki:
+	@echo "--> udpating genki"
+	@go get github.com/lukasjarosch/genki && go mod vendor

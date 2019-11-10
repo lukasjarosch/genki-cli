@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/fatih/color"
 )
@@ -9,6 +10,12 @@ import (
 const (
 	format = "%s: %s\n"
 )
+
+var log *cliLogger
+
+func init() {
+	log = NewCliLogger()
+}
 
 type cliLogger struct {
 }
@@ -48,18 +55,39 @@ func (l *cliLogger) Warningf(message string, args ...interface{}) {
 func (l *cliLogger) Errorf(message string, args ...interface{}) {
 	red := color.New(color.FgHiRed).SprintfFunc()
 	if len(args) > 0 {
-		fmt.Printf(format, red("ERRO"), fmt.Sprintf(message, args...))
+		fmt.Printf(format, red("ERR "), fmt.Sprintf(message, args...))
 		return
 	}
-	fmt.Printf(format, red("ERRO"), message)
+	fmt.Printf(format, red("ERR "), message)
 }
 
 func (l *cliLogger) Fatalf(message string, args ...interface{}) {
 	red := color.New(color.FgWhite, color.BgRed).SprintfFunc()
 	if len(args) > 0 {
 		fmt.Printf(format, red("FATA"), fmt.Sprintf(message, args...))
-		return
+		os.Exit(1)
 	}
 	fmt.Printf(format, red("FATA"), message)
+	os.Exit(1)
 }
 
+
+func Infof(message string, args ...interface{}) {
+	log.Infof(message, args...)
+}
+
+func Successf(message string, args ...interface{}) {
+	log.Successf(message, args...)
+}
+
+func Warningf(message string, args ...interface{}) {
+	log.Warningf(message, args...)
+}
+
+func Errorf(message string, args ...interface{}) {
+	log.Errorf(message, args...)
+}
+
+func Fatalf(message string, args ...interface{}) {
+	log.Fatalf(message, args...)
+}
