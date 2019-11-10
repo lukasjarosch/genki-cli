@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 var ValidProjectTypes = []string{"grpc-server", "http-server", "amqp-consumer", "http-gateway", "plain"}
 
 const FileName = "genki"
@@ -8,14 +10,40 @@ const FileType = "yaml"
 type Configuration struct {
 	rootPath string
 	Project  Project  `yaml:"project"`
-	Grpc     Grpc     `yaml:"grpc"`
-	Http     Http     `yaml:"http"`
 }
 
 type Project struct {
-	Namespace      string `yaml:"namespace"`
-	Service        string `yaml:"service"`
-	DockerRegistry string `yaml:"dockerRegistry"`
+	Name       string   `yaml:"name"`
+	Version    string   `yaml:"version"`
+	Generators []string `yaml:"generators"`
+}
+
+func (p *Project) GeneratorEnabled(identifier string) bool {
+	for _, gen := range p.Generators {
+		if gen == identifier {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Project) RemoveGenerator(identifier string) {
+	var newList []string
+	for _, gen := range p.Generators {
+		if gen == identifier {
+			continue
+		}
+		newList = append(newList, gen)
+	}
+	p.Generators = newList
+}
+
+func (p *Project) AddGenerator(identifier string) error {
+	if p.GeneratorEnabled(identifier) {
+		return fmt.Errorf("generator %s already enabled", identifier)
+	}
+	p.Generators = append(p.Generators, identifier)
+	return nil
 }
 
 type Grpc struct {
