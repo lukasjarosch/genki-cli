@@ -20,7 +20,7 @@ func NewCliLogger() *cliLogger {
 
 func (l *cliLogger) Infof(message string, args ...interface{}) {
 	cyan := color.New(color.FgCyan).SprintfFunc()
-	if len(args) < 0 {
+	if len(args) > 0 {
 		fmt.Printf(format, cyan("INFO"), fmt.Sprintf(message, args...))
 		return
 	}
@@ -45,7 +45,7 @@ func (l *cliLogger) Warningf(message string, args ...interface{}) {
 	fmt.Printf(format, yellow("WARN"), message)
 }
 
-func (l *cliLogger) Error(message string, args ...interface{}) {
+func (l *cliLogger) Errorf(message string, args ...interface{}) {
 	red := color.New(color.FgHiRed).SprintfFunc()
 	if len(args) > 0 {
 		fmt.Printf(format, red("ERRO"), fmt.Sprintf(message, args...))

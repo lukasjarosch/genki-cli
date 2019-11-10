@@ -11,9 +11,9 @@ func Overwrite(overwrite bool) Option {
     }
 }
 
-func Append(append bool) Option {
+func Append(appendWrite bool) Option {
     return func(opts *Options) {
-        opts.Append = append
+        opts.Append = appendWrite
     }
 }
 

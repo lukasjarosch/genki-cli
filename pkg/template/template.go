@@ -32,7 +32,7 @@ func (tpl *Template) Render(templateContext interface{}) ([]byte, error) {
 	    return nil, errors.Wrap(err, "unable to read template")
 	}
 
-	tmpl := template.New(tpl.opts.Name).Funcs(sprig.TxtFuncMap())
+	tmpl := template.New(tpl.opts.Name).Funcs(sprig.TxtFuncMap()).Funcs(tpl.opts.FuncMap)
 	tmpl, err = tmpl.Parse(string(buf))
 	if err != nil {
 	   	return nil, errors.Wrap(err, "unable to parse template")

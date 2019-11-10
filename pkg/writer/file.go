@@ -39,7 +39,7 @@ func (fw *FileWriter) WriteFile(data []byte) error {
 	}
 
 	if fw.opts.Append == true && fw.opts.Append == fw.opts.Overwrite {
-		return fmt.Errorf("append and overwrite flags are set, you have to choose one of them")
+		return fmt.Errorf("appendWrite and overwrite flags are set, you have to choose one of them")
 	}
 
 	if fw.opts.Overwrite {
@@ -50,27 +50,27 @@ func (fw *FileWriter) WriteFile(data []byte) error {
 	}
 
 	if fw.opts.Append {
-		if err := fw.append(data); err != nil {
+		if err := fw.appendWrite(data); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	return fmt.Errorf("path exists, overwrite and append is disabled. nothing written")
+	return fmt.Errorf("path exists, overwrite and appendWrite is disabled. nothing written")
 }
 
 func (fw *FileWriter) write(data []byte) error {
 	return ioutil.WriteFile(fw.path, data, 0644)
 }
 
-func (fw *FileWriter) append(data []byte) error {
+func (fw *FileWriter) appendWrite(data []byte) error {
 	f, err := os.OpenFile(fw.path, os.O_APPEND|os.O_WRONLY, 0644)
 	defer f.Close()
 	if err != nil {
-	    return errors.Wrap(err, "unbale to open file for append-write")
+	    return errors.Wrap(err, "unbale to open file for appendWrite-write")
 	}
 	if _, err := f.Write(data); err != nil {
-		return errors.Wrap(err, "unable to append-write file")
+		return errors.Wrap(err, "unable to appendWrite-write file")
 	}
 	return nil
 }

@@ -24,3 +24,16 @@ func Select(message string, options ...string) (string, error) {
 	}
 	return selected, nil
 }
+
+func Prompt(message string) (string, error) {
+	var input string
+	prompt := &survey.Input{
+		Message:  message,
+	}
+	err := survey.AskOne(prompt, &input)
+	if err != nil {
+	    return "", err
+	}
+	return input, nil
+}
+

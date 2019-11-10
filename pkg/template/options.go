@@ -1,9 +1,12 @@
 package template
 
+import "text/template"
+
 type Options struct {
 	Name     string
 	Path     string
 	GoSource bool
+	FuncMap template.FuncMap
 }
 
 func Name(name string) Option {
@@ -24,9 +27,16 @@ func GoSource(isGoSource bool) Option {
 	}
 }
 
+func FuncMap(funcMap template.FuncMap) Option {
+    return func(opts *Options) {
+        opts.FuncMap = funcMap
+    }
+}
+
 func newOptions(opts ...Option) Options {
 	opt := Options{
 		Name:     "default_template",
+		FuncMap: template.FuncMap{},
 		GoSource: false,
 	}
 
